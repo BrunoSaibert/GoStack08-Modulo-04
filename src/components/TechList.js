@@ -1,19 +1,65 @@
 import React, { Component } from "react";
 
-// import { Container } from './styles';
+import TechItem from "./TechItem";
 
 export default class TechList extends Component {
   state = {
-    techs: ["Node.js", "ReactJS", "React Native"]
+    newTech: "",
+    techs: []
+  };
+
+  componentDidMount() {
+    const techs = localStorage.getItem("techs");
+
+    if (techs) {
+      this.setState({ techs: JSON.parse(techs) });
+    }
+  }
+
+  componentDidUpdate(_, prevState) {
+    if (prevState.techs !== this.state.techs) {
+      localStorage.setItem("techs", JSON.stringify(this.state.techs));
+    }
+  }
+
+  handleInputChange = e => {
+    this.setState({ newTech: e.target.value });
+  };
+
+  handleSubmit = e => {
+    e.preventDefault();
+
+    this.setState({
+      techs: [...this.state.techs, this.state.newTech],
+      newTech: ""
+    });
+  };
+
+  handleDelete = tech => {
+    this.setState({
+      techs: this.state.techs.filter(r => r !== tech)
+    });
   };
 
   render() {
     return (
-      <ul>
-        <li>Node.js</li>
-        <li>ReactJS</li>
-        <li>React Native</li>
-      </ul>
+      <form onSubmit={this.handleSubmit}>
+        <ul>
+          {this.state.techs.map((tech, index) => (
+            <TechItem
+              key={index}
+              tech={tech}
+              onDelete={() => this.handleDelete(tech)}
+            />
+          ))}
+        </ul>
+        <input
+          type="text"
+          onChange={this.handleInputChange}
+          value={this.state.newTech}
+        />
+        <button type="submit">Enviar</button>
+      </form>
     );
   }
 }
